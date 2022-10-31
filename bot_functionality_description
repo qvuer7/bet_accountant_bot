@@ -1,0 +1,22 @@
+1. receive input from better in format:
+    1.text
+        date_placed;date_to_played;BC_name;Tournament;T1 - T2;Bet(O/U etc..);Coff; Amount; Percent for better
+    2. photo of betslip
+
+2.upload information to the database:
+    1. Excell
+    2. SQL
+
+bot structure:
+User            bot                                                                                                                                                                 background
+1. /start       Hello to start using this bot please register your name /register if not registred  or /place_bet if registred
+2. /register    Please send your Name these will merge your telegram id with name, in future all bets placed from this account will be on correspondend better(you)                 Record user id(?)
+2.1 Send name('Mikhail')    Mikhail is that right?/Name Mikhail is not avaliable please pick another name                                                                                                                             Record User id and Name, check if name is avaliable in database
+2.1.1 Yes/No    Mikhail saved under yout tg account u can now use /place_bet/Please send your Name these will merge your telegram id with name, in future all bets placed from this account will be on correspondend better(you)                               save name and uid to betters database/drop to 2(/register)
+
+
+2. /place_bet - 'send bet in as text in structure that: date_placed;date_to_played;BC_name;Tournament;T1 - T2;Bet(O/U etc..);Coff; Amount; Percent for better with spaces
+2.1 {bet in format}   - is this the bet you want to place: {bet in parsedformat}                                                                                                     parse bet
+2.2 Yes / No          - Gotit please send a betslip to save
+2.3 photo of betslip  - bet and betslip you sure is this the right bet:
+2.4 yes/no            - bet saved / 'send bet in as text...' /place bet
