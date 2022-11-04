@@ -66,9 +66,9 @@ def registerUser(id, name, uname):
 
     df_user = pd.DataFrame(
         {'BetUID': [], 'Sport': [], 'League': [], 'Game': [], 'Bet': [], 'Coff': [], 'Amount': [], 'PercentOwn': [], 'DatePlaced': [],
-         'DateOGame': [], 'Result': []}, index = [])
+         'DateOGame': [], 'Result': [], 'MarginTotal': [], 'MarginUP': [], 'MarginYours': []}, index = [])
     df_balance = pd.DataFrame(
-        {'Date': [], 'Balance': [], 'BalanceMargin': []}
+        {'Date': [], 'BalanceUP': [], 'BalanceOwn': []}
     )
     createUserDatabase(id)
 
@@ -103,6 +103,14 @@ def getUserDataPhotosPath(id):
     :return: path of correspondent user photos datafolder
     '''
     path = getUserDataFolderPath(id) + str('Betslips/')
+    return path
+
+def getUserExcellBetsPath(id):
+    path = getUserDataFolderPath(id = id)+str(id) + '_bets.xlsx'
+    return path
+
+def getUserExcellBalancePath(id):
+    path = getUserDataFolderPath(id = id) + str(id) + '_balance.xlsx'
     return path
 
 def getUserBalancePath(id):
@@ -161,10 +169,110 @@ def parseBet(bet):
     bet_list = bet.replace('(', '').split(')')[:-1]
     return  bet_list
 
+def getUserOpenedBetsList(id, params):
+    '''
+
+    :param id: telegram id of user
+    :param params: params of bet to be returned from list
+    :return:
+    '''
+    df = pd.read_csv(getUserDataCSVPath(id))
+    df = df.loc[df['Result'] == 'Pending'][params]
+    if df.empty:
+        return False
+    else:
+        return df.values.tolist()
+
+def changeBetResult(id, betId, result):
+    '''
+
+    :param id: int telegram user id
+    :param betId: int bet id
+    :param result: Win/Loss
+    :return:
+    '''
+    user_bet_df = pd.read_csv(getUserDataCSVPath(id))
+
+    if int(betId) not in user_bet_df['BetUID'].values:
+        return False
+
+    else:
+        print('bet id found')
+        user_bet_df.loc[user_bet_df['BetUID'] == betId, 'Result'] = result
+        user_bet_df.to_csv(getUserDataCSVPath(id), index = False)
+        return True
+
+def calculateUserBalance(id):
+    df = pd.read_csv(getUserDataCSVPath(id))
+    df.loc[df['Result'] == 'Win', 'MarginTotal'] = df.loc[df['Result'] == 'Win', 'Amount'] * \
+                                                    df.loc[df['Result'] == 'Win', 'Coff']  - \
+                                                    df.loc[df['Result'] == 'Win', 'Amount']
+    df.loc[df['Result'] == 'Loss', 'MarginTotal'] = -df.loc[df['Result'] == 'Loss', 'Amount']
+    df.loc[df['Result'] != 'Pending', 'MarginUP'] = df.loc[df['Result'] != 'Pending', 'MarginTotal'] * \
+                                                    (100 - df.loc[df['Result'] != 'Pending', 'PercentOwn'])/100
+    df.loc[df['Result'] != 'Pending', 'MarginYours'] = df.loc[df['Result'] != 'Pending', 'MarginTotal'] * \
+                                                        df.loc[df['Result'] != 'Pending', 'PercentOwn']/100
+
+    df.to_csv(getUserDataCSVPath(id), index = False)
+
+def updateUserBalance(id):
+    df_balance = pd.read_csv(getUserBalancePath(id))
+    df_bets = pd.read_csv(getUserDataCSVPath(id))
+
+    df_balance['Date'] =  df_bets['DateOGame'].unique()
+
+    for date in df_bets['DateOGame'].unique():
+        df_balance.loc[df_balance['Date'] == date, 'BalanceOwn'] = \
+            df_bets.loc[df_bets['DateOGame'] == date, 'MarginYours'].sum()
+
+        df_balance.loc[df_balance['Date'] == date, 'BalanceUP'] = \
+            df_bets.loc[df_bets['DateOGame'] == date, 'MarginUP'].sum()
+
+    df_balance.to_csv(getUserBalancePath(id), index = False)
+
+def generateUserBetsHistoryXSL(id):
+    df = pd.read_csv(getUserDataCSVPath(id = id))
+    df.to_excel(getUserExcellBetsPath(id = id))
+    return True
+
+def generateUserBalanceHistoryXSL(id):
+    df = pd.read_csv(getUserDataCSVPath(id = id))
+    df.to_excel(getUserExcellBalancePath(id = id))
+    return True
+
+def getBetByBetID(betID, id, params):
+    df = pd.read_csv(getUserDataCSVPath(id))
+    df = df.loc[df['BetUID'] == betID][params]
+    if df.empty:
+        return False
+    else:
+        return df.values.tolist()
+
+
 if __name__ == '__main__':
-
-
-    #registerUser(id = 1488, name = 'Andrii', uname = 'AZ')
-    bet_list = parseBet('(спорт)(лига)(матч)(ставка)(коф)(сумма)(процент себе)(дата ставки)(дата события)')
+    '''
+    registerUser(id = 1488, name = 'Andrii', uname = 'AZ')
+    bet_list = parseBet('(Football)(Italia 1)(Juventus - Lazio)(W1)(1.83)(1500)(10)(22-10-2022)(29-10-2022)')
     placeBet(id = 1488, bet_list = bet_list)
+    placeBet(id=1488, bet_list=bet_list)
+    placeBet(id = 1488, bet_list = bet_list)
+    changeBetResult(id=1488, betId=1, result='Win')
+    changeBetResult(id=1488, betId=2, result='Loss')
+    changeBetResult(id=1488, betId=3, result='Win')
 
+
+    bet_list = parseBet('(Football)(Italia 1)(Juventus - Lazio)(W1)(1.83)(1500)(10)(26-10-2022)(24-10-2022)')
+    placeBet(id = 1488, bet_list = bet_list)
+    bet_list = parseBet('(Football)(Italia 1)(Juventus - Lazio)(W1)(1.83)(1500)(10)(26-10-2022)(11-12-2022)')
+    placeBet(id=1488, bet_list=bet_list)
+    changeBetResult(id = 1488, betId=4, result = 'Win')
+    changeBetResult(id=1488, betId=5, result='Win')
+    calculateUserBalance(id = 1488)
+    updateUserBalance(id = 1488)
+    
+    generateUserBetsHistoryXSL(id = 1488)
+    generateUserBalanceHistoryXSL(id = 1488)
+    '''
+    #changeBetResult(id = 682847115, betId=2, result = 'Huynya')
+    calculateUserBalance(id = 682847115)
+    updateUserBalance(id = 682847115)

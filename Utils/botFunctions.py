@@ -136,6 +136,82 @@ async def cancel(update: Update, context: CallbackContext) -> int:
 
     return ConversationHandler.END
 
+
+async def editBetResultStart(update: Update, context: CallbackContext) -> int:
+
+    user = update.message.from_user
+    logging.info('User entered editBetResult function')
+    await update.message.reply_text(text = getUserOpenedBetsListText(id = user.id))
+    return 41
+
+async def choseBetResultToEdit(update: Update, context: CallbackContext) -> int:
+
+    user = update.message.from_user
+    betUID = update.message.text
+    logging.info('User inside chooseBetResultToEdit function')
+    context.user_data['betUID'] = int(betUID)
+    await update.message.reply_text(text = getEditBetResultTextIfBetExists(id = user['id'], betUID = betUID),
+                                    reply_markup=getYesNoInlineKeyboard(Y_callback='editBetWin', N_callback='editBetLoss'))
+    return 42
+
+async def editBetWin(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    changeBetResult(id = query['message']['chat']['id'], betId = int(context.user_data['betUID']), result='Win')
+    calculateUserBalance(id = query['message']['chat']['id'])
+    updateUserBalance(id = query['message']['chat']['id'])
+    await query.answer()
+    await query.edit_message_text(text=getBetResultUpdatedText(),
+                                  reply_markup=None)
+    return ConversationHandler.END
+
+async def editBetLoss(update: Update, context: CallbackContext) -> int:
+    query = update.callback_query
+    changeBetResult(id = query['message']['chat']['id'], betId = int(context.user_data['betUID']), result='Loss')
+    calculateUserBalance(id = query['message']['chat']['id'])
+    updateUserBalance(id = query['message']['chat']['id'])
+    await query.answer()
+    await query.edit_message_text(text=getBetResultUpdatedText(),
+                                  reply_markup=None)
+    return ConversationHandler.END
+
+async def getUserBetsHistoryExcell(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user
+
+    generateUserBetsHistoryXSL(id = user['id'])
+    excel_file_path = getUserExcellBetsPath(id = user['id'])
+    excel_file_path = getUserDataCSVPath(id = user['id'])
+    excel_file = open(excel_file_path, 'rb')
+    await context.bot.send_document(update.effective_chat.id, excel_file)
+    return 51
+
+async def getUserBalanceHistorExcell(update: Update, context: CallbackContext) -> int:
+    user = update.message.from_user
+
+    generateUserBalanceHistoryXSL(id = user['id'])
+    excel_file_path = getUserBalancePath(id = user['id'])
+    excel_file = open(excel_file_path, 'rb')
+    await  context.bot.send_document(update.effective_chat.id, excel_file)
+    return 52
+
+
+
+async def helpFunction(update: Update, context: CallbackContext) -> int:
+
+    await update.message.reply_text(text = getHelpText())
+    return 61
+
+def getEditBetResultHandler():
+    bet_result_handler = ConversationHandler(
+        entry_points = [CommandHandler('edit_result', editBetResultStart)],
+        states = {
+        41: [MessageHandler(filters.Regex('^([\s\d]+)$'), choseBetResultToEdit)],
+        42: [CallbackQueryHandler(editBetWin, pattern = 'editBetWin'),
+             CallbackQueryHandler(editBetLoss, pattern = 'editBetLoss')]
+        },
+        fallbacks = [CommandHandler('cancel', cancel)]
+    )
+    return bet_result_handler
+
 def getStartHandler():
     conv_handler_register = ConversationHandler(
         entry_points = [CommandHandler('start', start)],
@@ -170,9 +246,15 @@ def runBot():
     application = ApplicationBuilder().token(TOKEN).build()
     conv_handler_register = getStartHandler()
     conv_handler_place_bet = getPlaceBetHandler()
+    bet_result_handler = getEditBetResultHandler()
+
     application.add_handler(conv_handler_register)
     application.add_handler(conv_handler_place_bet)
+    application.add_handler(bet_result_handler)
 
-    application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('cancel', cancel))
+    application.add_handler(CommandHandler('get_balance_history', getUserBalanceHistorExcell))
+    application.add_handler(CommandHandler('get_bets_history', getUserBetsHistoryExcell))
+    application.add_handler(CommandHandler('help', helpFunction))
+
     application.run_polling()
