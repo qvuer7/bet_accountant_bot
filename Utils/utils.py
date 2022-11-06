@@ -2,6 +2,8 @@ import pandas as pd
 from config import *
 import datetime
 import os
+import pytesseract
+from PIL import Image
 
 def checkIfRegistredID(id):
     '''
@@ -197,7 +199,6 @@ def changeBetResult(id, betId, result):
         return False
 
     else:
-        print('bet id found')
         user_bet_df.loc[user_bet_df['BetUID'] == betId, 'Result'] = result
         user_bet_df.to_csv(getUserDataCSVPath(id), index = False)
         return True
@@ -216,11 +217,11 @@ def calculateUserBalance(id):
     df.to_csv(getUserDataCSVPath(id), index = False)
 
 def updateUserBalance(id):
-    df_balance = pd.read_csv(getUserBalancePath(id))
+    df_balance = pd.DataFrame(
+        {'Date': [], 'BalanceUP': [], 'BalanceOwn': []}
+    )
     df_bets = pd.read_csv(getUserDataCSVPath(id))
-
-    df_balance['Date'] =  df_bets['DateOGame'].unique()
-
+    df_balance['Date'] =  pd.Series(df_bets['DateOGame'].unique())
     for date in df_bets['DateOGame'].unique():
         df_balance.loc[df_balance['Date'] == date, 'BalanceOwn'] = \
             df_bets.loc[df_bets['DateOGame'] == date, 'MarginYours'].sum()
@@ -248,6 +249,10 @@ def getBetByBetID(betID, id, params):
     else:
         return df.values.tolist()
 
+def getTextFromImage(image_path):
+    img = Image.open(image_path)
+    text = print(pytesseract.image_to_string(img))
+    return img, text
 
 if __name__ == '__main__':
     '''
@@ -272,7 +277,22 @@ if __name__ == '__main__':
     
     generateUserBetsHistoryXSL(id = 1488)
     generateUserBalanceHistoryXSL(id = 1488)
-    '''
+
     #changeBetResult(id = 682847115, betId=2, result = 'Huynya')
     calculateUserBalance(id = 682847115)
     updateUserBalance(id = 682847115)
+    
+    betslips_folder = '/Users/andriizelenko/Desktop/betslips/'
+    photos = sorted(os.listdir(betslips_folder))
+    img, text = getTextFromImage(betslips_folder + photos[0])
+    img.show()
+    print(text)
+    '''
+    changeBetResult(id=1488, betId=4, result='Win')
+    changeBetResult(id=1488, betId=5, result='Loss')
+    changeBetResult(id=1488, betId=6, result='Win')
+    changeBetResult(id=1488, betId=7, result='Win')
+    changeBetResult(id=1488, betId=8, result='Loss')
+    changeBetResult(id=1488, betId=9, result='Win')
+    calculateUserBalance(id = 1488)
+    updateUserBalance(id = 1488)
