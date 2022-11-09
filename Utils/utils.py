@@ -157,7 +157,11 @@ def placeBet(id, bet_list):
                 'DateOGame': bet_list[8], 'Result': 'Pending'}
 
     df_user = df_user.append(bet_dict, ignore_index=True)
-    df_user.to_csv(getUserDataCSVPath(id), index = False)
+
+    df_user['DatePlaced'] = pd.to_datetime(df_user['DatePlaced'], format = "%d-%m-%Y")
+    df_user['DateOGame'] = pd.to_datetime(df_user['DateOGame'], format="%d-%m-%Y")
+
+    df_user.to_csv(getUserDataCSVPath(id), index = False, date_format='%d-%m-%Y')
 
 def getRegex():
     return '\((.*?)\)\((.*?)\)\((.*?)\)\((.*?)\)\(([0-9]*.[.].[0-9]*)\)\(([0-9]*)\)\(([0-9]*)\)\(([0-9]*.[-].[0-9]*.[-].[0-9]*)\)\(([0-9]*.[-].[0-9]*.[-].[0-9]*)\)'
@@ -218,18 +222,23 @@ def calculateUserBalance(id):
 
 def updateUserBalance(id):
     df_balance = pd.DataFrame(
-        {'Date': [], 'BalanceUP': [], 'BalanceOwn': []}
+        {'Date': [], 'BalanceUP': [], 'BalanceOwn': [], 'TotalOwn': [], 'TotalUp': []}
     )
     df_bets = pd.read_csv(getUserDataCSVPath(id))
-    df_balance['Date'] =  pd.Series(df_bets['DateOGame'].unique())
+    df_balance['Date'] =  pd.to_datetime(pd.Series(df_bets['DateOGame'].unique()), format = "%d-%m-%Y").sort_values(ignore_index=True)
+
     for date in df_bets['DateOGame'].unique():
-        df_balance.loc[df_balance['Date'] == date, 'BalanceOwn'] = \
+
+        df_balance.loc[df_balance['Date'].dt.strftime('%d-%m-%Y') == date, 'BalanceOwn'] = \
             df_bets.loc[df_bets['DateOGame'] == date, 'MarginYours'].sum()
 
-        df_balance.loc[df_balance['Date'] == date, 'BalanceUP'] = \
+        df_balance.loc[df_balance['Date'].dt.strftime('%d-%m-%Y') == date, 'BalanceUP'] = \
             df_bets.loc[df_bets['DateOGame'] == date, 'MarginUP'].sum()
 
-    df_balance.to_csv(getUserBalancePath(id), index = False)
+
+    df_balance['TotalOwn'] = df_balance.BalanceOwn.cumsum()
+    df_balance['TotalUp'] = df_balance.BalanceUP.cumsum()
+    df_balance.to_csv(getUserBalancePath(id), index = False,date_format='%d-%m-%Y' )
 
 def generateUserBetsHistoryXSL(id):
     df = pd.read_csv(getUserDataCSVPath(id = id))
@@ -287,7 +296,12 @@ if __name__ == '__main__':
     img, text = getTextFromImage(betslips_folder + photos[0])
     img.show()
     print(text)
+    
+        df_balance = pd.DataFrame(
+        {'Date': [], 'BalanceUP': [], 'BalanceOwn': []}
+    )
+    df_bets = pd.read_csv(getUserDataCSVPath(id = 682847115))
+    df_balance['Date'] =  pd.to_datetime(pd.Series(df_bets['DateOGame'].unique()), format = "%d-%m-%Y").sort_values(ignore_index=True)
+    print(df_balance)
     '''
-
-    changeBetResult(id = 1488,betId=10, result = 'Win')
-    updateUserBalance(id = 1488)
+    updateUserBalance(id = 682847115)

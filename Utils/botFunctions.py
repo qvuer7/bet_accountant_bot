@@ -178,7 +178,6 @@ async def getUserBetsHistoryExcell(update: Update, context: CallbackContext) -> 
     user = update.message.from_user
 
     generateUserBetsHistoryXSL(id = user['id'])
-    excel_file_path = getUserExcellBetsPath(id = user['id'])
     excel_file_path = getUserDataCSVPath(id = user['id'])
     excel_file = open(excel_file_path, 'rb')
     await context.bot.send_document(update.effective_chat.id, excel_file)
@@ -208,7 +207,8 @@ def getEditBetResultHandler():
         42: [CallbackQueryHandler(editBetWin, pattern = 'editBetWin'),
              CallbackQueryHandler(editBetLoss, pattern = 'editBetLoss')]
         },
-        fallbacks = [CommandHandler('cancel', cancel)]
+        fallbacks = [CommandHandler('cancel', cancel)],
+        per_user = True
     )
     return bet_result_handler
 
@@ -222,7 +222,8 @@ def getStartHandler():
             22: [CallbackQueryHandler(register, pattern='confirmName'),
                  CallbackQueryHandler(promptNameForRegistration, pattern = 'rejectName')]
         },
-        fallbacks=[CommandHandler('cancel', cancel)]
+        fallbacks=[CommandHandler('cancel', cancel)],
+        per_user=True
     )
     return conv_handler_register
 
@@ -237,7 +238,8 @@ def getPlaceBetHandler():
                  ]
 
         },
-        fallbacks=[CommandHandler('cancel', cancel)]
+        fallbacks=[CommandHandler('cancel', cancel)],
+        per_user=True
     )
     return conv_handler_place_bet
 
