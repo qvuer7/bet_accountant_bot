@@ -186,7 +186,7 @@ async def getUserBetsHistoryExcell(update: Update, context: CallbackContext) -> 
 
 async def getUserBalanceHistorExcell(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user
-
+    updateUserBalance(id=update.message.from_user['id'])
     generateUserBalanceHistoryXSL(id = user['id'])
     excel_file_path = getUserBalancePath(id = user['id'])
     excel_file = open(excel_file_path, 'rb')

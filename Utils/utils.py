@@ -288,11 +288,6 @@ if __name__ == '__main__':
     img.show()
     print(text)
     '''
-    changeBetResult(id=1488, betId=4, result='Win')
-    changeBetResult(id=1488, betId=5, result='Loss')
-    changeBetResult(id=1488, betId=6, result='Win')
-    changeBetResult(id=1488, betId=7, result='Win')
-    changeBetResult(id=1488, betId=8, result='Loss')
-    changeBetResult(id=1488, betId=9, result='Win')
-    calculateUserBalance(id = 1488)
+
+    changeBetResult(id = 1488,betId=10, result = 'Win')
     updateUserBalance(id = 1488)
