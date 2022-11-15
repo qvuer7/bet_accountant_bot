@@ -116,6 +116,14 @@ def getBetResultUpdatedText():
     text = f'Результат ставки обновлен.'
     return text
 
+def getAdminHelpCommandText():
+    new_line = '\n'
+    text = f'/get_users         - get list of users info {new_line}' \
+           f'/get_user_bets     - get particular user bet list {new_line}' \
+           f'/get_user_balance  - get particular user balance{new_line}' \
+           f'/update_user_bets  - update particular user bets'
+    return text
+
 def getHelpText():
     new_line = '\n'
     text = f'Этот бот позволяет вести учет ставок которые ты поставил{new_line}' \

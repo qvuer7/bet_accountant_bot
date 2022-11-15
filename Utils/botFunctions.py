@@ -1,5 +1,5 @@
 import logging
-
+import asyncio
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove
 from telegram.ext import (
     ApplicationBuilder,
@@ -9,14 +9,15 @@ from telegram.ext import (
     CallbackContext,
     CallbackQueryHandler,
     filters)
-
-
+import telegram
+import asyncio
 from Utils.messagesTexts import *
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
+
 
 
 def getYesNoInlineKeyboard(Y_callback, N_callback):
@@ -199,6 +200,7 @@ async def helpFunction(update: Update, context: CallbackContext) -> int:
     await update.message.reply_text(text = getHelpText())
     return 61
 
+
 def getEditBetResultHandler():
     bet_result_handler = ConversationHandler(
         entry_points = [CommandHandler('edit_result', editBetResultStart)],
@@ -243,20 +245,161 @@ def getPlaceBetHandler():
     )
     return conv_handler_place_bet
 
+#-------------------ADMIN FUNCTIONS---------------------
+async def getUsersData(update: Update, context: CallbackContext):
+
+    user_id= update.message.from_user['id']
+    if user_id == ADMIN_ID:
+        users_table = open(USERS_DATABASE_PATH, 'rb')
+        await context.bot.send_document(update.effective_chat.id, users_table)
+        return ConversationHandler.END
+    else:
+        return ConversationHandler.END
+
+async def getUsersBets(update: Update, context: CallbackContext):
+    user_id = update.message.from_user['id']
+    if user_id == ADMIN_ID:
+        await update.message.reply_text('ID:')
+        return 71
+    else:
+        return ConversationHandler.END
+
+async def sendUserBets(update: Update, context: CallbackContext):
+    user_id = update.message.text
+    try:
+        bets_file = getUserDataCSVPath(id = user_id)
+        bets_file = open(bets_file, 'rb')
+        await context.bot.send_document(update.effective_chat.id, bets_file)
+    except FileNotFoundError:
+        await update.message.reply_text('Eblan')
+
+    return ConversationHandler.END
+
+async def getUsersBalance(update: Update, context: CallbackContext):
+    user_id = update.message.from_user['id']
+    if user_id == ADMIN_ID:
+        await update.message.reply_text('ID:')
+        return 71
+    else:
+        return ConversationHandler.END
+
+async def sendUserBalance(update: Update, context: CallbackContext):
+    user_id = update.message.text
+    try:
+        bets_file = getUserBalancePath(id = user_id)
+        bets_file = open(bets_file, 'rb')
+        await context.bot.send_document(update.effective_chat.id, bets_file)
+    except FileNotFoundError:
+        await update.message.reply_text('Eblan')
+
+    return ConversationHandler.END
+
+async def getAdminHelp(update: Update, context: CallbackContext):
+    user_id = update.message.from_user['id']
+    if user_id == ADMIN_ID:
+        await update.message.reply_text(getAdminHelpCommandText())
+        return ConversationHandler.END
+    else:
+        return ConversationHandler.END
+
+async def updateUserBetsAdmin(update: Update, context: CallbackContext):
+    user_id = update.message.from_user['id']
+    if user_id == ADMIN_ID:
+        await update.message.reply_text('ID:')
+        return 81
+    else:
+        return ConversationHandler.END
+
+async def promtAdminBetsFile(update: Update, context: CallbackContext):
+    try:
+        user_id = int(update.message.text)
+    except ValueError:
+        await update.message.reply_text('Eblan')
+    if checkIfRegistredID(user_id):
+        await update.message.reply_text('Send File:')
+        context.user_data['user_bets_id'] = user_id
+        return 82
+    else:
+        await update.message.reply_text('Eblan')
+        return ConversationHandler.END
+
+async def updateUserBetsFileAdmin(update: Update, context: CallbackContext):
+
+    cor = context.bot.get_file(update.message.document.file_id)
+    path = getUserDataCSVPath(id = context.user_data['user_bets_id'])
+    file = await cor
+    await file.download(path)
+
+    await update.message.reply_text('bets file updated')
+    return ConversationHandler.END
+
+def getUserBetsDataAdminHandler():
+    handler = ConversationHandler(
+        entry_points = [CommandHandler('get_user_bets', getUsersBets)],
+        states = {
+            71: [MessageHandler(filters.TEXT, sendUserBets)],
+
+        },
+        fallbacks = [CommandHandler('cancel', cancel)],
+        per_user = True
+    )
+    return handler
+
+def getUserBalanceDataAdminHandler():
+    handler = ConversationHandler(
+        entry_points = [CommandHandler('get_user_balance', getUsersBalance)],
+        states = {
+            71: [MessageHandler(filters.TEXT, sendUserBalance)],
+
+        },
+        fallbacks = [CommandHandler('cancel', cancel)],
+        per_user = True
+    )
+    return handler
+
+def getUpdateUserBetsFileAdminHandler():
+    handler = ConversationHandler(
+        entry_points = [CommandHandler('update_user_bets', updateUserBetsAdmin)],
+        states = {
+            81: [MessageHandler(filters.TEXT, promtAdminBetsFile)],
+            82: [MessageHandler(filters.ATTACHMENT, updateUserBetsFileAdmin)]
+
+        },
+        fallbacks = [CommandHandler('cancel', cancel)],
+        per_user = True
+    )
+    return handler
+
+
+
+
+
+
+
 
 def runBot():
     application = ApplicationBuilder().token(TOKEN).build()
     conv_handler_register = getStartHandler()
     conv_handler_place_bet = getPlaceBetHandler()
     bet_result_handler = getEditBetResultHandler()
+    admin_bets_handler = getUserBetsDataAdminHandler()
+    admin_balance_handler = getUserBalanceDataAdminHandler()
+    admin_edit_bets_handler = getUpdateUserBetsFileAdminHandler()
 
     application.add_handler(conv_handler_register)
     application.add_handler(conv_handler_place_bet)
     application.add_handler(bet_result_handler)
+    application.add_handler(admin_bets_handler)
+    application.add_handler(admin_balance_handler)
+    application.add_handler(admin_edit_bets_handler)
 
     application.add_handler(CommandHandler('cancel', cancel))
     application.add_handler(CommandHandler('get_balance_history', getUserBalanceHistorExcell))
     application.add_handler(CommandHandler('get_bets_history', getUserBetsHistoryExcell))
     application.add_handler(CommandHandler('help', helpFunction))
+    application.add_handler(CommandHandler('get_users', getUsersData))
+    application.add_handler(CommandHandler('helpa', getAdminHelp))
+
+
 
     application.run_polling()

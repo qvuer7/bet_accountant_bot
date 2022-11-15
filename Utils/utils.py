@@ -4,6 +4,8 @@ import datetime
 import os
 import pytesseract
 from PIL import Image
+import cv2
+import re
 
 def checkIfRegistredID(id):
     '''
@@ -258,10 +260,7 @@ def getBetByBetID(betID, id, params):
     else:
         return df.values.tolist()
 
-def getTextFromImage(image_path):
-    img = Image.open(image_path)
-    text = print(pytesseract.image_to_string(img))
-    return img, text
+
 
 if __name__ == '__main__':
     '''
@@ -304,4 +303,17 @@ if __name__ == '__main__':
     df_balance['Date'] =  pd.to_datetime(pd.Series(df_bets['DateOGame'].unique()), format = "%d-%m-%Y").sort_values(ignore_index=True)
     print(df_balance)
     '''
-    updateUserBalance(id = 682847115)
+
+
+
+'''
+0  2 lines game  len 9 
+1  2 lines game  len 9
+2  1 line  game  len 8
+3  1 line  game  len 8 bluured
+4  1 line  game len 11 shit detection of text, date detected stake detected, max returns detected
+5  Hax returns instead of max return
+6  2 line bet description
+date placed
+
+'''
