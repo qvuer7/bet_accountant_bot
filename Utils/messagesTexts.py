@@ -143,5 +143,150 @@ def getHelpText():
            f'/help - для вызова этого текста.{new_line}' \
            f'Админ: @vadim_doroxov'
     return text
+
+def getPromtSportText():
+    text = f'Введи спорт на который сделал ставку'
+    return text
+
+def getPromptGameText(sport):
+    new_line = '\n'
+    tab = '\t'
+    text = f'---Ставка---{new_line}' \
+           f'Спорт:{tab}{sport}{new_line}' \
+           f'------------{new_line}' \
+           f'Введи игру на которую сделал ставку'
+    return text
+
+def getPromptLeagueText(sport, game):
+    new_line = '\n'
+    tab = '\t'
+    text = f'---Ставка---{new_line}' \
+           f'Спорт :{tab}{sport}{new_line}' \
+           f'Игра   :{tab}{game}{new_line}' \
+           f'------------{new_line}' \
+           f'Введи Лигу'
+    return text
+
+def getPromptBetText(sport, game, league):
+    new_line = '\n'
+    tab = '\t'
+    text = f'---Ставка---{new_line}' \
+           f'Спорт :{tab}{sport}{new_line}' \
+           f'Игра   :{tab}{game}{new_line}' \
+           f'Лига   :{tab}{league}{new_line}' \
+           f'------------{new_line}' \
+           f'Введи ставку'
+    return text
+
+
+
+def getPromtCoffText(sport, game,league, bet):
+    new_line = '\n'
+    tab = '\t'
+    text = f'---Ставка---{new_line}' \
+           f'Спорт :{tab}{sport}{new_line}' \
+           f'Игра   :{tab}{game}{new_line}' \
+           f'Лига   :{tab}{league}{new_line}' \
+           f'Исход :{tab}{bet}{new_line}' \
+           f'------------{new_line}' \
+           f'Введи кофф (прим 2.0, 1.84)'
+    return text
+
+
+def getPromtAmontText(sport, game,league, bet, coff):
+    new_line = '\n'
+    tab = '\t'
+    text = f'---Ставка---{new_line}' \
+           f'Спорт :{tab}{sport}{new_line}' \
+           f'Игра   :{tab}{game}{new_line}' \
+           f'Лига   :{tab}{league}{new_line}' \
+           f'Исход :{tab}{bet}{new_line}' \
+           f'Коф      :{tab}{coff}{new_line}' \
+           f'------------{new_line}' \
+           f'Введи сумму ставки (прим 1400)'
+    return text
+
+def getPromtPercentText(sport, game, league,bet, coff, amount):
+    new_line = '\n'
+    tab = '\t'
+    text = f'---Ставка---{new_line}' \
+           f'Спорт :{tab}{sport}{new_line}' \
+           f'Игра   :{tab}{game}{new_line}' \
+           f'Лига   :{tab}{league}{new_line}' \
+           f'Исход :{tab}{bet}{new_line}' \
+           f'Коф      :{tab}{coff}{new_line}' \
+           f'Сумма :{tab}{amount}{new_line}' \
+           f'------------{new_line}' \
+           f'Введи свой процент (прим 10)'
+    return text
+
+def getPromtDatePlacedText(sport, game ,league, bet, coff, amount, percentOwn):
+    new_line = '\n'
+    tab = '\t'
+    text = f'------------Ставка----------{new_line}' \
+           f'Спорт               :{tab}{sport}{new_line}' \
+           f'Игра                 :{tab}{game}{new_line}' \
+           f'Лига                 :{tab}{league}{new_line}' \
+           f'Исход               :{tab}{bet}{new_line}' \
+           f'Коф                   :{tab}{coff}{new_line}' \
+           f'Сумма              :{tab}{amount}{new_line}' \
+           f'Твой процент  :{tab}{percentOwn}{new_line}' \
+           f'----------------------------{new_line}' \
+           f'Введи дату ставки(когда поставил) (прим 22-10-2022, 01-01-2001)'
+    return text
+
+def getPromtDateGameText(sport, game, league, bet, coff, amount, percentOwn, datePlaced):
+    new_line = '\n'
+    tab = '\t'
+    text = f'------------Ставка----------{new_line}' \
+           f'Спорт               :{tab}{sport}{new_line}' \
+           f'Игра                 :{tab}{game}{new_line}' \
+           f'Лига                 :{tab}{league}{new_line}' \
+           f'Исход               :{tab}{bet}{new_line}' \
+           f'Коф                   :{tab}{coff}{new_line}' \
+           f'Сумма              :{tab}{amount}{new_line}' \
+           f'Твой процент  :{tab}{percentOwn}{new_line}' \
+           f'Дата ставки     :{tab}{datePlaced}{new_line}' \
+           f'----------------------------{new_line}' \
+           f'Введи дату Игры(когда рызыгрышь) (прим 22-10-2022, 01-01-2001)'
+    return text
+
+def getPromtBetConformation(sport, game,league, bet, coff, amount, percentOwn, datePlaced, dateOGame):
+    new_line = '\n'
+    tab = '\t'
+    text = f'------------Ставка----------{new_line}' \
+           f'Спорт               :{tab}{sport}{new_line}' \
+           f'Игра                 :{tab}{game}{new_line}' \
+           f'Лига                 :{tab}{league}{new_line}' \
+           f'Исход               :{tab}{bet}{new_line}' \
+           f'Коф                   :{tab}{coff}{new_line}' \
+           f'Сумма              :{tab}{amount}{new_line}' \
+           f'Твой процент  :{tab}{percentOwn}{new_line}' \
+           f'Дата ставки     :{tab}{datePlaced}{new_line}' \
+           f'Дата игры        :{tab}{dateOGame}{new_line}'\
+           f'----------------------------{new_line}' \
+           f'Верно?'
+    return text
+
+
+def getBetPlacedMessageText(sport, game,league, bet, coff, amount, percentOwn, datePlaced, dateOGame):
+    new_line = '\n'
+    tab = '\t'
+    text = f'------------Ставка----------{new_line}' \
+           f'Спорт               :{tab}{sport}{new_line}' \
+           f'Игра                 :{tab}{game}{new_line}' \
+           f'Лига                 :{tab}{league}{new_line}' \
+           f'Исход               :{tab}{bet}{new_line}' \
+           f'Коф                   :{tab}{coff}{new_line}' \
+           f'Сумма              :{tab}{amount}{new_line}' \
+           f'Твой процент  :{tab}{percentOwn}{new_line}' \
+           f'Дата ставки     :{tab}{datePlaced}{new_line}' \
+           f'Дата игры        :{tab}{dateOGame}{new_line}'\
+           f'----------------------------{new_line}' \
+           f'Ставка принята'
+    return text
+
+
+
 if __name__ == '__main__':
     print(getEditBetResultTextIfBetExists(id = 682847115, betUID = 1))

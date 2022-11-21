@@ -2,9 +2,6 @@ import pandas as pd
 from config import *
 import datetime
 import os
-import pytesseract
-from PIL import Image
-import cv2
 import re
 
 def checkIfRegistredID(id):

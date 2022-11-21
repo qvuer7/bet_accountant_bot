@@ -201,6 +201,252 @@ async def helpFunction(update: Update, context: CallbackContext) -> int:
     return 61
 
 
+async def promtSport(update: Update, context: CallbackContext) -> int:
+    cor = context.bot.send_message(text = getPromtSportText(), chat_id = update.effective_chat.id)
+    message = await cor
+    context.user_data['previous_message_id'] = message['message_id']
+
+    return 91
+
+async def promtGame(update: Update, context: CallbackContext) -> int:
+    sport = update.message.text
+    context.user_data['bet_sport'] = sport
+    cor = context.bot.edit_message_text(chat_id = update.effective_chat.id,
+                                        message_id = context.user_data['previous_message_id'],
+                                        text = getPromptGameText(sport = sport))
+    message = await cor
+    context.user_data['previous_message_id'] = message['message_id']
+    await context.bot.deleteMessage(chat_id=update.effective_chat.id,message_id=update.message.id)
+
+    return 92
+
+async def promtLeague(update: Update, context: CallbackContext) -> int:
+    game = update.message.text
+    context.user_data['bet_game'] = game
+
+    cor = context.bot.edit_message_text(chat_id = update.effective_chat.id,
+                                        message_id = context.user_data['previous_message_id'],
+                                        text = getPromptLeagueText(sport = context.user_data['bet_sport'],
+                                                                 game = game))
+    message = await cor
+    context.user_data['previous_message_id'] = message['message_id']
+    await context.bot.deleteMessage(chat_id = update.effective_chat.id, message_id = update.message.id)
+
+    return 93
+
+async def promtBet(update: Update, context: CallbackContext) -> int:
+    league = update.message.text
+    context.user_data['bet_league'] = league
+
+    cor = context.bot.edit_message_text(chat_id = update.effective_chat.id,
+                                        message_id = context.user_data['previous_message_id'],
+                                        text = getPromptBetText(sport = context.user_data['bet_sport'],
+                                                                 game = context.user_data['bet_game'],
+                                                                 league = league))
+    message = await cor
+    context.user_data['previous_message_id'] = message['message_id']
+    await context.bot.deleteMessage(chat_id = update.effective_chat.id, message_id = update.message.id)
+
+    return 94
+
+async def promtCoff(update: Update, context: CallbackContext) -> int:
+
+    bet = update.message.text
+    context.user_data['bet_bet'] = bet
+    cor = context.bot.edit_message_text(chat_id = update.effective_chat.id,
+                                        message_id = context.user_data['previous_message_id'],
+                                        text = getPromtCoffText(sport = context.user_data['bet_sport'],
+                                                                game = context.user_data['bet_game'],
+                                                                league = context.user_data['bet_league'],
+                                                                bet = bet))
+    message = await cor
+    context.user_data['previous_message_id'] = message['message_id']
+    await context.bot.deleteMessage(chat_id = update.effective_chat.id, message_id = update.message.id)
+
+    return 95
+
+async def promtAmount(update: Update, context: CallbackContext) -> int:
+
+    try:
+        coff = float(update.message.text)
+
+        context.user_data['bet_coff'] = coff
+        cor = context.bot.edit_message_text(chat_id = update.effective_chat.id,
+                                            message_id = context.user_data['previous_message_id'],
+                                            text = getPromtAmontText(sport = context.user_data['bet_sport'],
+                                                                    game = context.user_data['bet_game'],
+                                                                    bet = context.user_data['bet_bet'],
+                                                                    league=context.user_data['bet_league'],
+                                                                    coff = coff))
+        message = await cor
+        context.user_data['previous_message_id'] = message['message_id']
+        await context.bot.deleteMessage(chat_id = update.effective_chat.id, message_id = update.message.id)
+
+        return 96
+    except ValueError:
+        return 951
+
+async def promptPercentOwn(update: Update, context: CallbackContext) -> int:
+
+    try:
+        amount = int(update.message.text)
+        context.user_data['bet_amount'] = amount
+        cor = context.bot.edit_message_text(chat_id=update.effective_chat.id,
+                                        message_id=context.user_data['previous_message_id'],
+                                        text=getPromtPercentText(sport=context.user_data['bet_sport'],
+                                                               game=context.user_data['bet_game'],
+                                                               bet=context.user_data['bet_bet'],
+                                                               league=context.user_data['bet_league'],
+                                                               coff=context.user_data['bet_coff'],
+                                                               amount = amount))
+        message = await cor
+        context.user_data['previous_message_id'] = message['message_id']
+        await context.bot.deleteMessage(chat_id=update.effective_chat.id, message_id=update.message.id)
+        return 97
+    except ValueError:
+        return 961
+
+async def promptDatePlaced(update: Update, context: CallbackContext) -> int:
+
+    try:
+        percent = float(update.message.text)
+        context.user_data['bet_percent'] = percent
+        cor = context.bot.edit_message_text(chat_id=update.effective_chat.id,
+                                        message_id=context.user_data['previous_message_id'],
+                                        text=getPromtDatePlacedText(sport=context.user_data['bet_sport'],
+                                                               game=context.user_data['bet_game'],
+                                                               bet=context.user_data['bet_bet'],
+                                                               league=context.user_data['bet_league'],
+                                                               coff=context.user_data['bet_coff'],
+                                                               amount = context.user_data['bet_amount'],
+                                                               percentOwn=percent))
+        message = await cor
+        context.user_data['previous_message_id'] = message['message_id']
+        await context.bot.deleteMessage(chat_id=update.effective_chat.id, message_id=update.message.id)
+        return 98
+    except ValueError:
+        return 971
+
+
+async def promptDateGame(update: Update, context: CallbackContext) -> int:
+
+
+    datePlaced = update.message.text
+    context.user_data['bet_date_placed'] = datePlaced
+    cor = context.bot.edit_message_text(chat_id=update.effective_chat.id,
+                                    message_id=context.user_data['previous_message_id'],
+                                    text=getPromtDateGameText(sport=context.user_data['bet_sport'],
+                                                           game=context.user_data['bet_game'],
+                                                           bet=context.user_data['bet_bet'],
+                                                           league=context.user_data['bet_league'],
+                                                           coff=context.user_data['bet_coff'],
+                                                           amount = context.user_data['bet_amount'],
+                                                           percentOwn=context.user_data['bet_percent'],
+                                                           datePlaced = datePlaced))
+    message = await cor
+    context.user_data['previous_message_id'] = message['message_id']
+    await context.bot.deleteMessage(chat_id=update.effective_chat.id, message_id=update.message.id)
+    return 99
+
+async def confrirmFinalBet(update: Update, context: CallbackContext) -> int:
+
+
+    dateOGame = update.message.text
+    context.user_data['bet_date_o_game'] = dateOGame
+    cor = context.bot.edit_message_text(chat_id=update.effective_chat.id,
+                                    message_id=context.user_data['previous_message_id'],
+                                    text=getPromtBetConformation(sport=context.user_data['bet_sport'],
+                                                           game=context.user_data['bet_game'],
+                                                           bet=context.user_data['bet_bet'],
+                                                           league=context.user_data['bet_league'],
+                                                           coff=context.user_data['bet_coff'],
+                                                           amount = context.user_data['bet_amount'],
+                                                           percentOwn=context.user_data['bet_percent'],
+                                                           datePlaced = context.user_data['bet_date_placed'],
+                                                           dateOGame = dateOGame),
+                                    reply_markup=getYesNoInlineKeyboard(Y_callback='confirmBet', N_callback='rejectBet'))
+    message = await cor
+    context.user_data['previous_message_id'] = message['message_id']
+    await context.bot.deleteMessage(chat_id=update.effective_chat.id, message_id=update.message.id)
+    return 100
+
+async def confirmAndPlaceBet(update: Update, context: CallbackContext):
+    query = update.callback_query
+
+    bet_list = [context.user_data['bet_sport'],
+                context.user_data['bet_league'],
+           context.user_data['bet_game'],
+           context.user_data['bet_bet'],
+           context.user_data['bet_coff'],
+           context.user_data['bet_amount'],
+           context.user_data['bet_percent'],
+           context.user_data['bet_date_placed'],
+           context.user_data['bet_date_o_game']]
+
+    placeBet(id = query['message']['chat']['id'],bet_list = bet_list)
+    await query.answer('Ставка принята')
+    await query.edit_message_text(text=getBetPlacedMessageText(sport=context.user_data['bet_sport'],
+                                                           game=context.user_data['bet_game'],
+                                                           bet=context.user_data['bet_bet'],
+                                                           league=context.user_data['bet_league'],
+                                                           coff=context.user_data['bet_coff'],
+                                                           amount = context.user_data['bet_amount'],
+                                                           percentOwn=context.user_data['bet_percent'],
+                                                           datePlaced = context.user_data['bet_date_placed'],
+                                                           dateOGame = context.user_data['bet_date_o_game']),
+                                 reply_markup=None)
+    return ConversationHandler.END
+
+async def rejectBet(update: Update, context: CallbackContext):
+    query = update.callback_query
+    await query.answer()
+    await query.edit_message_text(text=str('Start from beginning'),
+                                  reply_markup=None)
+    return ConversationHandler.END
+
+from telegram.ext import filters
+
+def getPlaceBetSeparatelyHandler():
+    handler = ConversationHandler(
+        entry_points = [CommandHandler('place_bet_s', promtSport)],
+        states = {
+            91: [CommandHandler('cancel', cancel),
+                MessageHandler(filters.TEXT , promtGame)
+                 ],
+            92: [CommandHandler('cancel', cancel),
+                MessageHandler(filters.TEXT, promtLeague)
+                 ],
+            93: [CommandHandler('cancel', cancel),
+                MessageHandler(filters.TEXT, promtBet),
+                 ],
+            94: [CommandHandler('cancel', cancel),
+                MessageHandler(filters.TEXT, promtCoff),
+                 ],
+            95: [CommandHandler('cancel', cancel),
+                MessageHandler(filters.TEXT, promtAmount),
+                 ],
+            96: [CommandHandler('cancel', cancel),
+                MessageHandler(filters.TEXT, promptPercentOwn),
+                 ],
+            97: [CommandHandler('cancel', cancel),
+                MessageHandler(filters.TEXT, promptDatePlaced),
+                 ],
+            98: [CommandHandler('cancel', cancel),
+                MessageHandler(filters.TEXT,  promptDateGame),
+                 ],
+            99: [CommandHandler('cancel', cancel),
+                MessageHandler(filters.TEXT, confrirmFinalBet),
+                 ],
+            100: [CallbackQueryHandler(confirmAndPlaceBet, pattern = 'confirmBet'),
+                 CallbackQueryHandler(rejectBet, pattern = 'rejectBet')]
+        },
+        fallbacks = [CommandHandler('cancel', cancel)],
+        per_user = True
+    )
+
+    return handler
+
+
 def getEditBetResultHandler():
     bet_result_handler = ConversationHandler(
         entry_points = [CommandHandler('edit_result', editBetResultStart)],
@@ -382,6 +628,7 @@ def runBot():
     conv_handler_register = getStartHandler()
     conv_handler_place_bet = getPlaceBetHandler()
     bet_result_handler = getEditBetResultHandler()
+    place_bet_s_handler = getPlaceBetSeparatelyHandler()
     admin_bets_handler = getUserBetsDataAdminHandler()
     admin_balance_handler = getUserBalanceDataAdminHandler()
     admin_edit_bets_handler = getUpdateUserBetsFileAdminHandler()
@@ -392,6 +639,7 @@ def runBot():
     application.add_handler(admin_bets_handler)
     application.add_handler(admin_balance_handler)
     application.add_handler(admin_edit_bets_handler)
+    application.add_handler(place_bet_s_handler)
 
     application.add_handler(CommandHandler('cancel', cancel))
     application.add_handler(CommandHandler('get_balance_history', getUserBalanceHistorExcell))
