@@ -408,7 +408,7 @@ from telegram.ext import filters
 
 def getPlaceBetSeparatelyHandler():
     handler = ConversationHandler(
-        entry_points = [CommandHandler('place_bet_s', promtSport)],
+        entry_points = [CommandHandler('place_bet', promtSport)],
         states = {
             91: [CommandHandler('cancel', cancel),
                 MessageHandler(filters.TEXT , promtGame)
@@ -626,7 +626,7 @@ def getUpdateUserBetsFileAdminHandler():
 def runBot():
     application = ApplicationBuilder().token(TOKEN).build()
     conv_handler_register = getStartHandler()
-    conv_handler_place_bet = getPlaceBetHandler()
+    #conv_handler_place_bet = getPlaceBetHandler()
     bet_result_handler = getEditBetResultHandler()
     place_bet_s_handler = getPlaceBetSeparatelyHandler()
     admin_bets_handler = getUserBetsDataAdminHandler()
@@ -634,7 +634,7 @@ def runBot():
     admin_edit_bets_handler = getUpdateUserBetsFileAdminHandler()
 
     application.add_handler(conv_handler_register)
-    application.add_handler(conv_handler_place_bet)
+    #application.add_handler(conv_handler_place_bet)
     application.add_handler(bet_result_handler)
     application.add_handler(admin_bets_handler)
     application.add_handler(admin_balance_handler)
