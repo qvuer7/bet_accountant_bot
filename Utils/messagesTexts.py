@@ -121,7 +121,8 @@ def getAdminHelpCommandText():
     text = f'/get_users         - get list of users info {new_line}' \
            f'/get_user_bets     - get particular user bet list {new_line}' \
            f'/get_user_balance  - get particular user balance{new_line}' \
-           f'/update_user_bets  - update particular user bets'
+           f'/update_user_bets  - update particular user bets{new_line}' \
+           f'/generate_report_a - generate todays report for all users'
     return text
 
 def getHelpText():
@@ -178,8 +179,6 @@ def getPromptBetText(sport, game, league):
            f'Введи ставку'
     return text
 
-
-
 def getPromtCoffText(sport, game,league, bet):
     new_line = '\n'
     tab = '\t'
@@ -191,7 +190,6 @@ def getPromtCoffText(sport, game,league, bet):
            f'------------{new_line}' \
            f'Введи кофф (прим 2.0, 1.84)'
     return text
-
 
 def getPromtAmontText(sport, game,league, bet, coff):
     new_line = '\n'

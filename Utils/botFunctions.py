@@ -327,10 +327,7 @@ async def promptDatePlaced(update: Update, context: CallbackContext) -> int:
     except ValueError:
         return 971
 
-
 async def promptDateGame(update: Update, context: CallbackContext) -> int:
-
-
     datePlaced = update.message.text
     context.user_data['bet_date_placed'] = datePlaced
     cor = context.bot.edit_message_text(chat_id=update.effective_chat.id,
@@ -404,8 +401,6 @@ async def rejectBet(update: Update, context: CallbackContext):
                                   reply_markup=None)
     return ConversationHandler.END
 
-from telegram.ext import filters
-
 def getPlaceBetSeparatelyHandler():
     handler = ConversationHandler(
         entry_points = [CommandHandler('place_bet', promtSport)],
@@ -445,7 +440,6 @@ def getPlaceBetSeparatelyHandler():
     )
 
     return handler
-
 
 def getEditBetResultHandler():
     bet_result_handler = ConversationHandler(
@@ -490,6 +484,10 @@ def getPlaceBetHandler():
         per_user=True
     )
     return conv_handler_place_bet
+
+async def generateReportForTodayUser(update: Update, context: CallbackContext):
+    report = generateReportTodayOneUser(user_id=update.message.from_user.id)
+    await update.message.reply_text(text=report)
 
 #-------------------ADMIN FUNCTIONS---------------------
 async def getUsersData(update: Update, context: CallbackContext):
@@ -579,6 +577,14 @@ async def updateUserBetsFileAdmin(update: Update, context: CallbackContext):
     await update.message.reply_text('bets file updated')
     return ConversationHandler.END
 
+async def generateReportForTodayAdmin(update: Update, context: CallbackContext):
+    uid = update.message.from_user.id
+    if uid == ADMIN_ID:
+        report = generateAllUserReportToday()
+        await update.message.reply_text(text=report)
+    else:
+        return ConversationHandler.END
+
 def getUserBetsDataAdminHandler():
     handler = ConversationHandler(
         entry_points = [CommandHandler('get_user_bets', getUsersBets)],
@@ -618,11 +624,6 @@ def getUpdateUserBetsFileAdminHandler():
 
 
 
-
-
-
-
-
 def runBot():
     application = ApplicationBuilder().token(TOKEN).build()
     conv_handler_register = getStartHandler()
@@ -647,6 +648,9 @@ def runBot():
     application.add_handler(CommandHandler('help', helpFunction))
     application.add_handler(CommandHandler('get_users', getUsersData))
     application.add_handler(CommandHandler('helpa', getAdminHelp))
+    application.add_handler(CommandHandler('generate_report', generateReportForTodayUser))
+    application.add_handler(CommandHandler('generate_report_a', generateReportForTodayAdmin))
+
 
 
 

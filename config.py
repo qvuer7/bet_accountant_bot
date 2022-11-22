@@ -14,4 +14,3 @@ USERS_DATABASE_BETS_DATA_PATH = f'/Users/andriizelenko/qvuer7/projects/beting_ac
 
 #USERS_DATABASE_PATH = '/home/andriizelenko/bet_accountant_bot/data/Users.csv'
 #USERS_DATABASE_BETS_DATA_PATH = '/home/andriizelenko/bet_accountant_bot/data/bets_data_from_users/'
-

@@ -13,10 +13,10 @@ def checkIfRegistredID(id):
     df = pd.read_csv(USERS_DATABASE_PATH)
 
     if id in df['TelegramID'].values:
-        print('registred')
+
         return True
     else:
-        print('not registred')
+
         return False
 
 def checkIfRegistredName(name):
@@ -257,50 +257,91 @@ def getBetByBetID(betID, id, params):
     else:
         return df.values.tolist()
 
+def getAllUsersBets():
+    users_df = pd.read_csv(USERS_DATABASE_PATH)
+
+    for i, id  in enumerate(users_df.TelegramID.values):
+        user_df = pd.read_csv(getUserDataCSVPath(id))
+        user_df = user_df.drop(['BetUID'], axis = 1)
+        user_df['Placer'] = getNamebyID(id)
+        if i == 0:
+            all_bets = pd.DataFrame(columns = user_df.columns)
+        all_bets = pd.concat([all_bets, user_df], ignore_index = True)
+    return all_bets
+
+def generateReportOneUser(user_id, date, balance_yours = None, balance_up = None):
+    new_line   = '\n'
+    user_bets = pd.read_csv(getUserDataCSVPath(id = user_id))
+    user_bets['DateOGame'] = pd.to_datetime(user_bets['DateOGame'], format = "%d-%m-%Y", dayfirst = True)
+    user_bets = user_bets[user_bets['DateOGame'] == date]
+    report = f'------------------------{date}---------------------------{new_line}'
+    for i, value in enumerate(user_bets.values):
+        if value[10] == 'Pending':
+            report += f'{value[0]} | {value[1]} | {value[2]} | {value[3]} | {value[4]} | {value[5]} | {value[6]}' \
+                      f' | {value[7]}% | {value[10]} {new_line}'
+        else:
+            report += f'{value[0]} | {value[1]} | {value[2]} | {value[3]} | {value[4]} | {value[5]} | {value[6]}' \
+                      f' | {value[7]}% | {value[10]} | {value[-2]} | {value[-3]} | {new_line}'
+    report += f'-----------------------Баланс за {date}-------------------{new_line}'
+
+    report += f"Общий твой: {round(user_bets['MarginYours'].sum(),2)}{new_line}"
+    report += f"Общий наверх: {round(user_bets['MarginUP'].sum(),2)}{new_line}"
+    if balance_up:
+        report += f'-------------------Баланс тотал-------------------{new_line}'
+
+        report += f"Общий твой: {balance_yours + round(user_bets['MarginYours'].sum(), 2)}{new_line}"
+        report += f"Общий наверх: {balance_up + round(user_bets['MarginUP'].sum(),2)}{new_line}"
+
+
+    stats = f''
+    for idx, name in enumerate(user_bets['Result'].value_counts().index.tolist()):
+        stats += f"{name}   : {user_bets['Result'].value_counts()[idx]}{new_line}"
+    report += f"Статистика {new_line}{stats}"
+
+    return report
+
+def generateReportTodayOneUser(user_id,  balance_yours = None, balance_up = None):
+    date = f'{datetime.datetime.now().day}-{datetime.datetime.now().month}-{datetime.datetime.now().year}'
+    report = generateReportOneUser(user_id = user_id, date =  date, balance_yours = balance_yours,
+                                   balance_up = balance_up)
+    return report
+
+def generateAllUsersReport(date, balance_up = None):
+    new_line = '\n'
+    df = getAllUsersBets()
+    df['DateOGame'] = pd.to_datetime(df['DateOGame'], format="%d-%m-%Y", dayfirst=True)
+    df = df[df['DateOGame'] == date]
+    report = f'------------------------{date}---------------------------{new_line}'
+    for i, value in enumerate(df.values):
+
+
+        if value[10] == 'Pending':
+            report += f'{value[0]} | {value[1]} | {value[2]} | {value[3]} | {value[4]} | {value[5]} | {value[6]}' \
+                      f'% | {value[10]} {new_line}'
+        else:
+            report += f'{value[0]} | {value[1]} | {value[2]} | {value[3]} | {value[4]} | {value[5]} | {value[6]}' \
+                      f'% | {value[10]} | {value[-2]} | {value[-3]} | {new_line}'
+    report += f'-----------------------Баланс за {date}-------------------{new_line}'
+
+    report += f"Общий : {round(df['MarginUP'].sum(),2)}{new_line}"
+    if balance_up:
+        report += f'-------------------Баланс тотал-------------------{new_line}'
+
+        report += f"Общий : {balance_up + df['MarginUP'].sum()}{new_line}"
+
+
+
+    return report
+
+def generateAllUserReportToday(balance_up = None):
+    date = f'{datetime.datetime.now().day}-{datetime.datetime.now().month}-{datetime.datetime.now().year}'
+    report = generateAllUsersReport(date = date, balance_up = balance_up)
+    return report
 
 
 if __name__ == '__main__':
-    '''
-    registerUser(id = 1488, name = 'Andrii', uname = 'AZ')
-    bet_list = parseBet('(Football)(Italia 1)(Juventus - Lazio)(W1)(1.83)(1500)(10)(22-10-2022)(29-10-2022)')
-    placeBet(id = 1488, bet_list = bet_list)
-    placeBet(id=1488, bet_list=bet_list)
-    placeBet(id = 1488, bet_list = bet_list)
-    changeBetResult(id=1488, betId=1, result='Win')
-    changeBetResult(id=1488, betId=2, result='Loss')
-    changeBetResult(id=1488, betId=3, result='Win')
-
-
-    bet_list = parseBet('(Football)(Italia 1)(Juventus - Lazio)(W1)(1.83)(1500)(10)(26-10-2022)(24-10-2022)')
-    placeBet(id = 1488, bet_list = bet_list)
-    bet_list = parseBet('(Football)(Italia 1)(Juventus - Lazio)(W1)(1.83)(1500)(10)(26-10-2022)(11-12-2022)')
-    placeBet(id=1488, bet_list=bet_list)
-    changeBetResult(id = 1488, betId=4, result = 'Win')
-    changeBetResult(id=1488, betId=5, result='Win')
-    calculateUserBalance(id = 1488)
-    updateUserBalance(id = 1488)
-    
-    generateUserBetsHistoryXSL(id = 1488)
-    generateUserBalanceHistoryXSL(id = 1488)
-
-    #changeBetResult(id = 682847115, betId=2, result = 'Huynya')
-    calculateUserBalance(id = 682847115)
-    updateUserBalance(id = 682847115)
-    
-    betslips_folder = '/Users/andriizelenko/Desktop/betslips/'
-    photos = sorted(os.listdir(betslips_folder))
-    img, text = getTextFromImage(betslips_folder + photos[0])
-    img.show()
-    print(text)
-    
-        df_balance = pd.DataFrame(
-        {'Date': [], 'BalanceUP': [], 'BalanceOwn': []}
-    )
-    df_bets = pd.read_csv(getUserDataCSVPath(id = 682847115))
-    df_balance['Date'] =  pd.to_datetime(pd.Series(df_bets['DateOGame'].unique()), format = "%d-%m-%Y").sort_values(ignore_index=True)
-    print(df_balance)
-    '''
-
+    rep = generateReportTodayOneUser(user_id = 682847115)
+    print(rep)
 
 
 '''
